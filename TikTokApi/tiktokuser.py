@@ -42,10 +42,11 @@ class TikTokUser:
             + ',{"insigh_type":"video_uv","aweme_id":"'
             + videoID
             + '"}'
-            + ',{"insigh_type":"vv_history","days":8}'
-            + ',{"insigh_type":"follower_num_history","days":9}'
+            + ',{"insigh_type":"vv_history","days":30}'
+            + ',{"insigh_type":"follower_num_history","days":30}'
             + ',{"insigh_type":"follower_num"}'
             + ',{"insigh_type":"user_info"}'
+            + ',{"insigh_type":"pv_history","days":30}'
         )
         r = requests.post(
             api_url,

@@ -98,19 +98,23 @@ class browser:
         self.height = "1440" #page.evaluate("""() => { return screen.height; }""")
 
     def create_page(self, set_useragent=False):
-        iphone = playwright.devices["iPhone 11 Pro"]
-        iphone["viewport"] = {
-            "width": random.randint(320, 1920),
-            "height": random.randint(320, 1920),
+        device = {
+            'viewport': {
+                "width": 3440,
+                "height": 1440,
+            },
+            'userAgent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36',
+            "isMobile": False
         }
-        iphone["deviceScaleFactor"] = random.randint(1, 3)
-        iphone["isMobile"] = random.randint(1, 2) == 1
-        iphone["hasTouch"] = random.randint(1, 2) == 1
-        iphone['userAgent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36'
+        # iphone = playwright.devices["iPhone 11 Pro"]
+        # iphone["deviceScaleFactor"] = random.randint(1, 3)
+        # iphone["isMobile"] = random.randint(1, 2) == 1
+        # iphone["hasTouch"] = random.randint(1, 2) == 1
+        # iphone['userAgent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36'
 
-        context = self.browser.newContext(**iphone)
+        context = self.browser.newContext(**device)
         if set_useragent:
-            self.userAgent = iphone["userAgent"]
+            self.userAgent = device["userAgent"]
             self.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36'
         page = context.newPage()
 
@@ -181,9 +185,9 @@ class browser:
             did = str(random.randint(10000, 999999999))
         else:
             did = self.did
-        print('==== did and vfp ====')
-        print(did)
-        print(verifyFp)
+        # print('==== did and vfp ====')
+        # print(did)
+        # print(verifyFp)
         page.setContent("<script> " + get_acrawler() + " </script>")
         url_ben = 'https://m.tiktok.com/api/item_list/?aid=1988&app_name=tiktok_web&device_platform=web&referer=&user_agent=Mozilla%2F5.0+(Windows+NT+10.0%3B+Win64%3B+x64)+AppleWebKit%2F537.36+(KHTML,+like+Gecko)+Chrome%2F86.0.4240.198+Safari%2F537.36&cookie_enabled=true&screen_width=3440&screen_height=1440&browser_language=en-US&browser_platform=Win32&browser_name=Mozilla&browser_version=5.0+(Windows+NT+10.0%3B+Win64%3B+x64)+AppleWebKit%2F537.36+(KHTML,+like+Gecko)+Chrome%2F86.0.4240.198+Safari%2F537.36&browser_online=true&ac=4g&timezone_name=America%2FLos_Angeles&page_referer=https:%2F%2Fwww.tiktok.com%2F@benthamite&priority_region=&verifyFp=verify_khgyofu6_YP8cEg4o_QpRA_4lbj_89kv_LOaIzzExQcAs&appId=1233&region=US&appType=m&isAndroid=false&isMobile=false&isIOS=false&OS=windows&did=6894770323305154053&count=30&id=6745191554350760966&secUid=MS4wLjABAAAAM3R2BtjzVT-uAtstkl2iugMzC6AtnpkojJbjiOdDDrdsTiTR75-8lyWJCY5VvDrZ&maxCursor=0&minCursor=0&sourceType=8&language=en'
         # page.goto('https://www.tiktok.com/@fallontonight')
@@ -195,8 +199,8 @@ class browser:
         var token = window.byted_acrawler.sign({url: url});
         return token;
         }""")
-        print(f'Ben signature: {ben_signature}')
-        print(f'Ben URL: {url_ben}&_signature={ben_signature}')
+        # print(f'Ben signature: {ben_signature}')
+        # print(f'Ben URL: {url_ben}&_signature={ben_signature}')
         return (
             verifyFp,
             did,

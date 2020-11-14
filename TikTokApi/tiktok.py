@@ -2,13 +2,14 @@ import random
 import requests
 import time
 import logging
-from urllib.parse import urlencode, quote
+from urllib.parse import urlencode, quote, urlparse
 from .browser import browser, get_playwright
 from playwright import sync_playwright
 import logging
 import os
 from .utilities import update_messager
 from urllib import parse
+
 os.environ['no_proxy'] = '127.0.0.1,localhost'
 
 BASE_URL = "https://m.tiktok.com/"
@@ -134,20 +135,38 @@ class TikTokApi:
         if self.proxy != None:
             proxy = self.proxy
 
+        param_order = ['aid', 'app_name', 'device_platform', 'referer', 'user_agent', 'cookie_enabled', 'screen_width', 'screen_height',
+        'browser_language', 'browser_platform', 'browser_name', 'browser_version', 'browser_online', 'ac', 'timezone_name', 'page_referer',
+        'priority_region', 'verifyFp', 'region', 'appType', 'isAndroid', 'isMobile', 'isIOS', 'OS', 'did', 'count', 'id', 'secUid', 'maxCursor',
+        'minCursor', 'sourceType', 'language', '_signature']
+
+        s = urlparse(kwargs["url"])
+        # print(qs)
+        qs = parse.parse_qs(s.query)
+        if 'custom_did' in kwargs:
+            qs['did'] = [kwargs['custom_did']]
+        qs['verifyFp'] = [kwargs.get("custom_verifyFp", "verify_khgp4f49_V12d4mRX_MdCO_4Wzt_Ar0k_z4RCQC9pUDpX")]        
+        ordered_parameters = [(p, qs.get(p, [''])[0]) for p in param_order]
+        # print(ordered_parameters)
+        url = s.scheme + '://' + s.netloc + '/api/item_list/?' + urlencode(ordered_parameters).replace('%3A', ':').replace('%28', '(').replace('%29', ')').replace('%2C', ',').replace('%40', '@')
+        print(ordered_parameters)
         if self.signer_url == None:
-            print('-=-=-=-=-= here')
+            # print('-=-=-=-=-= here')
             verify_fp, did, signature = self.browser.sign_url(**kwargs)
             userAgent = self.browser.userAgent
             referrer = self.browser.referrer
         else:
-            print('-=-=-=-=-= there')
-            verify_fp, did, signature, userAgent, referrer = self.external_signer(kwargs['url'], custom_did=kwargs.get('custom_did', None))
-        query = {"verifyFp": verify_fp, "did": int(did), "_signature": signature}
-        url = "{}&{}".format(kwargs["url"], urlencode(query))
+            # print('-=-=-=-=-= there')
+            verify_fp, did, signature, userAgent, referrer = self.external_signer(url, custom_did=kwargs.get('custom_did', None))
+        url = url + '&_signature=' + signature
+        print('============url')
+        print(url)
+        # query = {"verifyFp": verify_fp, "did": int(did), "_signature": signature}
+        # url = "{}&{}".format(kwargs["url"], urlencode(query))
         # .replace('%3B', ';')
-        url = url.replace('%3A', ':').replace('%28', '(').replace('%29', ')').replace('%2C', ',').replace('%40', '@')
-        print(parse.parse_qs(url))
-        print((url))
+        # url = url.replace('%3A', ':').replace('%28', '(').replace('%29', ')').replace('%2C', ',').replace('%40', '@')
+        # print(parse.parse_qs(url))
+        # print(signature)
         r = requests.get(
             url,
             headers={

@@ -36,6 +36,7 @@ class TikTokApi:
             "AppleWebKit/537.36 (KHTML, like Gecko) "
             "Chrome/86.0.4240.111 Safari/537.36"
         )
+        self.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36'
         self.proxy = kwargs.get("proxy", None)
 
         self.signer_url = kwargs.get("external_signer", None)
@@ -45,7 +46,7 @@ class TikTokApi:
         
 
         try:
-            self.timezone_name = self.__format_new_params__(self.browser.timezone_name)
+            self.timezone_name = self.browser.timezone_name #self.__format_new_params__(self.browser.timezone_name)
             self.browser_language = self.__format_new_params__(
                 self.browser.browser_language
             )
@@ -53,9 +54,10 @@ class TikTokApi:
                 self.browser.browser_platform
             )
             self.browser_name = self.__format_new_params__(self.browser.browser_name)
-            self.browser_version = self.__format_new_params__(
-                self.browser.browser_version
-            )
+            self.browser_version = self.browser.browser_version
+            #self.__format_new_params__(
+            # self.browser.browser_version
+            #)
             self.width = self.browser.width
             self.height = self.browser.height
         except Exception as e:
@@ -133,14 +135,17 @@ class TikTokApi:
             proxy = self.proxy
 
         if self.signer_url == None:
+            print('-=-=-=-=-= here')
             verify_fp, did, signature = self.browser.sign_url(**kwargs)
             userAgent = self.browser.userAgent
             referrer = self.browser.referrer
         else:
+            print('-=-=-=-=-= there')
             verify_fp, did, signature, userAgent, referrer = self.external_signer(kwargs['url'], custom_did=kwargs.get('custom_did', None))
         query = {"verifyFp": verify_fp, "did": int(did), "_signature": signature}
         url = "{}&{}".format(kwargs["url"], urlencode(query))
-        
+        # .replace('%3B', ';')
+        url = url.replace('%3A', ':').replace('%28', '(').replace('%29', ')').replace('%2C', ',').replace('%40', '@')
         print(parse.parse_qs(url))
         print((url))
         r = requests.get(
@@ -250,7 +255,7 @@ class TikTokApi:
                 "sourceType": 12,
                 "appId": 1233,
                 "region": region,
-                "priority_region": region,
+                "priority_region": '',
                 "language": language,
             }
             api_url = "{}api/item_list/?{}&{}".format(
@@ -387,18 +392,15 @@ class TikTokApi:
             query = {
                 "count": realCount,
                 "id": userID,
-                "type": 1,
+                # "type": 1,
                 "secUid": secUID,
                 "maxCursor": maxCursor,
                 "minCursor": minCursor,
                 "sourceType": 8,
-                "appId": 1233,
+                # "appId": 1233,
                 "region": region,
-                "priority_region": region,
+                "priority_region": '', #region,
                 "language": language,
-                'browser_language': 'en-US',
-                'browser_platform': 'Win32',
-                'browser_name': 'Mozilla',
             }
             api_url = "{}api/item_list/?{}&{}".format(
                 BASE_URL, self.__add_new_params__(), urlencode(query)
@@ -1394,8 +1396,8 @@ class TikTokApi:
             "aid": 1988,
             "app_name": "tiktok_web",
             "device_platform": "web",
-            "referer": "https://www.tiktok.com/",
-            "user_agent": self.__format_new_params__(self.userAgent),
+            "referer": '', #"https://www.tiktok.com/",
+            "user_agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36', #self.__format_new_params__(self.userAgent),
             "cookie_enabled": "true",
             "screen_width": self.width,
             "screen_height": self.height,
@@ -1408,11 +1410,11 @@ class TikTokApi:
             "timezone_name": self.timezone_name,
             "appId": 1233,
             "appType": "m",
-            "isAndroid": False,
-            "isMobile": False,
-            "isIOS": False,
+            "isAndroid": 'false',
+            "isMobile": 'false',
+            "isIOS": 'false',
             "OS": "windows",
-            "page_referer": "https://www.tiktok.com/"
+            "page_referer": "https://www.tiktok.com/@benthamite"
         }
         return urlencode(query)
 

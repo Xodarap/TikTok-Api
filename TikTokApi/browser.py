@@ -73,7 +73,7 @@ class browser:
             self.options["executablePath"] = self.executablePath
 
         try:
-            self.browser = get_playwright().webkit.launch(args=self.args, **self.options)
+            self.browser = get_playwright().chromium.launch(args=self.args, **self.options)
         except Exception as e:
             raise e
             logging.critical(e)
@@ -84,18 +84,18 @@ class browser:
 
     def get_params(self, page) -> None:
         # self.browser_language = await self.page.evaluate("""() => { return navigator.language || navigator.userLanguage; }""")
-        self.browser_language = ""
+        self.browser_language = "en-US"
         # self.timezone_name = await self.page.evaluate("""() => { return Intl.DateTimeFormat().resolvedOptions().timeZone; }""")
-        self.timezone_name = ""
+        self.timezone_name = "America/Los_Angeles"
         # self.browser_platform = await self.page.evaluate("""() => { return window.navigator.platform; }""")
-        self.browser_platform = ""
+        self.browser_platform = "Win32"
         # self.browser_name = await self.page.evaluate("""() => { return window.navigator.appCodeName; }""")
-        self.browser_name = ""
+        self.browser_name = "Mozilla"
         # self.browser_version = await self.page.evaluate("""() => { return window.navigator.appVersion; }""")
-        self.browser_version = ""
+        self.browser_version = "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36"
 
-        self.width = page.evaluate("""() => { return screen.width; }""")
-        self.height = page.evaluate("""() => { return screen.height; }""")
+        self.width = "3440" #page.evaluate("""() => { return screen.width; }""")
+        self.height = "1440" #page.evaluate("""() => { return screen.height; }""")
 
     def create_page(self, set_useragent=False):
         iphone = playwright.devices["iPhone 11 Pro"]
@@ -106,11 +106,12 @@ class browser:
         iphone["deviceScaleFactor"] = random.randint(1, 3)
         iphone["isMobile"] = random.randint(1, 2) == 1
         iphone["hasTouch"] = random.randint(1, 2) == 1
+        iphone['userAgent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36'
 
         context = self.browser.newContext(**iphone)
         if set_useragent:
             self.userAgent = iphone["userAgent"]
-            self.userAgent = '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36'
+            self.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36'
         page = context.newPage()
 
         return page
@@ -180,8 +181,22 @@ class browser:
             did = str(random.randint(10000, 999999999))
         else:
             did = self.did
-
+        print('==== did and vfp ====')
+        print(did)
+        print(verifyFp)
         page.setContent("<script> " + get_acrawler() + " </script>")
+        url_ben = 'https://m.tiktok.com/api/item_list/?aid=1988&app_name=tiktok_web&device_platform=web&referer=&user_agent=Mozilla%2F5.0+(Windows+NT+10.0%3B+Win64%3B+x64)+AppleWebKit%2F537.36+(KHTML,+like+Gecko)+Chrome%2F86.0.4240.198+Safari%2F537.36&cookie_enabled=true&screen_width=3440&screen_height=1440&browser_language=en-US&browser_platform=Win32&browser_name=Mozilla&browser_version=5.0+(Windows+NT+10.0%3B+Win64%3B+x64)+AppleWebKit%2F537.36+(KHTML,+like+Gecko)+Chrome%2F86.0.4240.198+Safari%2F537.36&browser_online=true&ac=4g&timezone_name=America%2FLos_Angeles&page_referer=https:%2F%2Fwww.tiktok.com%2F@benthamite&priority_region=&verifyFp=verify_khgyofu6_YP8cEg4o_QpRA_4lbj_89kv_LOaIzzExQcAs&appId=1233&region=US&appType=m&isAndroid=false&isMobile=false&isIOS=false&OS=windows&did=6894770323305154053&count=30&id=6745191554350760966&secUid=MS4wLjABAAAAM3R2BtjzVT-uAtstkl2iugMzC6AtnpkojJbjiOdDDrdsTiTR75-8lyWJCY5VvDrZ&maxCursor=0&minCursor=0&sourceType=8&language=en'
+        # page.goto('https://www.tiktok.com/@fallontonight')
+        ben_signature = page.evaluate(
+                '''() => {
+        var url = "'''
+                + url_ben
+                + """"
+        var token = window.byted_acrawler.sign({url: url});
+        return token;
+        }""")
+        print(f'Ben signature: {ben_signature}')
+        print(f'Ben URL: {url_ben}&_signature={ben_signature}')
         return (
             verifyFp,
             did,
@@ -199,7 +214,7 @@ class browser:
         }"""
             ),
         )
-        page.close()
+        page.close() # _02B4Z6wo00f013oBR3wAAICDcPD.EPIIsBN6MEPAAIE3b2
 
     def clean_up(self):
         try:

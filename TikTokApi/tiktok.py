@@ -124,7 +124,7 @@ class TikTokApi:
             maxCount,
             did,
         ) = self.__process_kwargs__(kwargs)
-        kwargs['custom_did'] = did
+        kwargs['custom_did'] = (did)
         if self.request_delay is not None:
             time.sleep(self.request_delay)
 
@@ -139,6 +139,7 @@ class TikTokApi:
             verify_fp, did, signature, userAgent, referrer = self.external_signer(kwargs['url'], custom_did=kwargs.get('custom_did', None))
         query = {"verifyFp": verify_fp, "did": did, "_signature": signature}
         url = "{}&{}".format(kwargs["url"], urlencode(query))
+        print(url.split("tiktok.com")[1])
         r = requests.get(
             url,
             headers={
@@ -150,14 +151,17 @@ class TikTokApi:
                 "accept-encoding": "gzip, deflate, br",
                 "accept-language": "en-US,en;q=0.9",
                 "referer": referrer,
-                "sec-fetch-dest": "empty",
-                "sec-fetch-mode": "cors",
-                "sec-fetch-site": "same-site",
+                "sec-fetch-dest": "document",
+                "sec-fetch-mode": "navigate",
+                "sec-fetch-site": "none",
+                "sec-fetch-user": "?1",
+                "upgrade-insecure-requests": "1",
                 "user-agent": userAgent,
                 "cookie": "tt_webid_v2=" + did,
             },
             proxies=self.__format_proxy(proxy),
         )
+        print(r.text)
         try:
             return r.json()
         except Exception as e:
@@ -370,7 +374,7 @@ class TikTokApi:
             did,
         ) = self.__process_kwargs__(kwargs)
         kwargs['custom_did'] = did
-
+        print(kwargs['custom_did'] )
         response = []
         first = True
 
@@ -392,12 +396,14 @@ class TikTokApi:
                 "region": region,
                 "priority_region": region,
                 "language": language,
+                'uid': 6639029544903655430
             }
             api_url = "{}api/item_list/?{}&{}".format(
                 BASE_URL, self.__add_new_params__(), urlencode(query)
             )
 
             res = self.getData(url=api_url, **kwargs)
+            logging.info(res)
             if "items" in res.keys():
                 for t in res["items"]:
                     response.append(t)
@@ -434,6 +440,7 @@ class TikTokApi:
         ) = self.__process_kwargs__(kwargs)
         kwargs['custom_did'] = did
         data = self.getUserObject(username, **kwargs)
+        print(data["secUid"])
         return self.userPosts(
             data["id"],
             data["secUid"],
@@ -1001,6 +1008,8 @@ class TikTokApi:
         ) = self.__process_kwargs__(kwargs)
         kwargs['custom_did'] = did
         secUid = self.get_secUid(username)
+        print(secUid)
+        # secUid = 'MS4wLjABAAAA0n2PUHENB3-UWq2zXT5CqRQB8Ga1PfnysIpvEXNyh_MTQyrj8_UWFD7VBbAIwACe'
         query = {"uniqueId": username, "language": language, "isUniqueId": True, "validUniqueId": username, "sec_uid": "", "secUid": secUid}
         api_url = "{}node/share/user/@{}?{}&{}".format(
             BASE_URL, quote(username), self.__add_new_params__(), urlencode(query)
@@ -1348,6 +1357,7 @@ class TikTokApi:
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36",
             "Cookie": "s_v_web_id=" + kwargs.get("custom_verifyFp", "verify_khgp4f49_V12d4mRX_MdCO_4Wzt_Ar0k_z4RCQC9pUDpX"),
         }, proxies=self.__format_proxy(kwargs.get("proxy", None)))
+        # print(r.text)
         try:
             return r.text.split('"secUid":"')[1].split('","secret":')[0]
         except IndexError as e:

@@ -131,6 +131,8 @@ class TikTokApi:
         if self.proxy != None:
             proxy = self.proxy
 
+        kwargs['url'] = kwargs['url'].replace('%3A', ':').replace('%28', '(').replace('%29', ')').replace('%2C', ',').replace('%40', '@')
+
         if self.signer_url == None:
             verify_fp, did, signature = self.browser.sign_url(**kwargs)
             userAgent = self.browser.userAgent

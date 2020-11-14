@@ -110,6 +110,7 @@ class browser:
         context = self.browser.newContext(**iphone)
         if set_useragent:
             self.userAgent = iphone["userAgent"]
+            self.userAgent = '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36'
         page = context.newPage()
 
         return page

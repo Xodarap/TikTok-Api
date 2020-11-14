@@ -8,6 +8,7 @@ from playwright import sync_playwright
 import logging
 import os
 from .utilities import update_messager
+from urllib import parse
 os.environ['no_proxy'] = '127.0.0.1,localhost'
 
 BASE_URL = "https://m.tiktok.com/"
@@ -137,9 +138,11 @@ class TikTokApi:
             referrer = self.browser.referrer
         else:
             verify_fp, did, signature, userAgent, referrer = self.external_signer(kwargs['url'], custom_did=kwargs.get('custom_did', None))
-        query = {"verifyFp": verify_fp, "did": did, "_signature": signature}
+        query = {"verifyFp": verify_fp, "did": int(did), "_signature": signature}
         url = "{}&{}".format(kwargs["url"], urlencode(query))
-        print(url.split("tiktok.com")[1])
+        
+        print(parse.parse_qs(url))
+        print((url))
         r = requests.get(
             url,
             headers={
@@ -151,17 +154,14 @@ class TikTokApi:
                 "accept-encoding": "gzip, deflate, br",
                 "accept-language": "en-US,en;q=0.9",
                 "referer": referrer,
-                "sec-fetch-dest": "document",
-                "sec-fetch-mode": "navigate",
-                "sec-fetch-site": "none",
-                "sec-fetch-user": "?1",
-                "upgrade-insecure-requests": "1",
+                "sec-fetch-dest": "empty",
+                "sec-fetch-mode": "cors",
+                "sec-fetch-site": "same-site",
                 "user-agent": userAgent,
-                "cookie": "tt_webid_v2=" + did,
+                # "cookie": "tt_webid_v2=" + did,
             },
             proxies=self.__format_proxy(proxy),
         )
-        print(r.text)
         try:
             return r.json()
         except Exception as e:
@@ -396,12 +396,13 @@ class TikTokApi:
                 "region": region,
                 "priority_region": region,
                 "language": language,
-                'uid': 6639029544903655430
+                'browser_language': 'en-US',
+                'browser_platform': 'Win32',
+                'browser_name': 'Mozilla',
             }
             api_url = "{}api/item_list/?{}&{}".format(
                 BASE_URL, self.__add_new_params__(), urlencode(query)
             )
-
             res = self.getData(url=api_url, **kwargs)
             logging.info(res)
             if "items" in res.keys():

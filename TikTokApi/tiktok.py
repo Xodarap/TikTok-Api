@@ -27,8 +27,9 @@ class TikTokApi:
             TikTokApi.__instance = self
         else:
             raise Exception("Only one TikTokApi object is allowed")
-        logging.basicConfig(level=kwargs.get("logging_level", logging.WARNING))
-        logging.info("Class initalized")
+        logging.basicConfig(level=kwargs.get("logging_level", logging.INFO))
+        logging.info("Class initalized3")
+        logging.info("Class initalized2")
         self.executablePath = kwargs.get("executablePath", None)
 
         self.userAgent = (

@@ -39,13 +39,15 @@ class TikTokApi:
         self.proxy = kwargs.get("proxy", None)
 
         self.signer_url = kwargs.get("external_signer", None)
+        logging.info(f"sign: {self.signer_url}")
         if self.signer_url == None:
             self.browser = browser(**kwargs)
             self.userAgent = self.browser.userAgent
-        
+        logging.info("signed")
 
         try:
             self.timezone_name = self.__format_new_params__(self.browser.timezone_name)
+            logging.info(self.timezone_name)
             self.browser_language = self.__format_new_params__(
                 self.browser.browser_language
             )
@@ -56,10 +58,13 @@ class TikTokApi:
             self.browser_version = self.__format_new_params__(
                 self.browser.browser_version
             )
+            logging.info(self.browser_version)
             self.width = self.browser.width
             self.height = self.browser.height
+            logging.info(self.width)
         except Exception as e:
             logging.warning("An error occured but it was ignored.")
+            logging.info('errrs')
 
             self.timezone_name = ""
             self.browser_language = ""

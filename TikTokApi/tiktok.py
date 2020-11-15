@@ -2,7 +2,8 @@ import random
 import requests
 import time
 import logging
-from urllib.parse import urlencode, quote, urlparse
+import json
+from urllib.parse import urlencode, quote
 from .browser import browser, get_playwright
 from playwright import sync_playwright
 import logging
@@ -182,7 +183,11 @@ class TikTokApi:
                 "sec-fetch-mode": "cors",
                 "sec-fetch-site": "same-site",
                 "user-agent": userAgent,
+<<<<<<< HEAD
                 # "cookie": "tt_webid_v2=" + did,
+=======
+                "cookie": "tt_webid_v2=" + did + ';s_v_web_id=' + kwargs.get("custom_verifyFp", "verify_khgp4f49_V12d4mRX_MdCO_4Wzt_Ar0k_z4RCQC9pUDpX"),
+>>>>>>> 13f9605e8bcbe86dd324397cc99f966b2b31e04e
             },
             proxies=self.__format_proxy(proxy),
         )
@@ -719,6 +724,16 @@ class TikTokApi:
                          Note: Doesn't seem to have an affect.
         :param proxy: The IP address of a proxy to make requests from.
         """
+        return self.getMusicObjectFull(id, **kwargs)['music']
+
+    def getMusicObjectFull(self, id, **kwargs):
+        """Returns a music object for a specific sound id.
+
+        :param id: The sound id to search by.
+        :param language: The 2 letter code of the language to return.
+                         Note: Doesn't seem to have an affect.
+        :param proxy: The IP address of a proxy to make requests from.
+        """
         (
             region,
             language,
@@ -726,14 +741,18 @@ class TikTokApi:
             maxCount,
             did,
         ) = self.__process_kwargs__(kwargs)
-        kwargs['custom_did'] = did
-
-        query = {"musicId": id, "language": language}
-        api_url = "{}node/share/music/{}?{}&{}".format(
-            BASE_URL, self.get_music_title(id, **kwargs) + "-" + str(id), self.__add_new_params__(), urlencode(query)
-        )
-
-        return self.getData(url=api_url, **kwargs)
+        r = requests.get("https://www.tiktok.com/music/-{}".format(id), headers={
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                "authority": "www.tiktok.com",
+                "Accept-Encoding": "gzip, deflate",
+                "Connection": "keep-alive",
+                "Host": "www.tiktok.com",
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36",
+                "Cookie": "s_v_web_id=" + kwargs.get("custom_verifyFp", "verify_khgp4f49_V12d4mRX_MdCO_4Wzt_Ar0k_z4RCQC9pUDpX"),
+            }, proxies=self.__format_proxy(kwargs.get("proxy", None)))
+        t = r.text
+        j_raw = t.split('<script id="__NEXT_DATA__" type="application/json" crossorigin="anonymous">')[1].split("</script>")[0]
+        return json.loads(j_raw)['props']['pageProps']['musicInfo']
 
     def byHashtag(self, hashtag, count=30, offset=0, **kwargs) -> dict:
         """Returns a dictionary listing TikToks with a specific hashtag.
@@ -1028,16 +1047,22 @@ class TikTokApi:
             maxCount,
             did,
         ) = self.__process_kwargs__(kwargs)
-        kwargs['custom_did'] = did
-        secUid = self.get_secUid(username)
-        print(secUid)
-        # secUid = 'MS4wLjABAAAA0n2PUHENB3-UWq2zXT5CqRQB8Ga1PfnysIpvEXNyh_MTQyrj8_UWFD7VBbAIwACe'
-        query = {"uniqueId": username, "language": language, "isUniqueId": True, "validUniqueId": username, "sec_uid": "", "secUid": secUid}
-        api_url = "{}node/share/user/@{}?{}&{}".format(
-            BASE_URL, quote(username), self.__add_new_params__(), urlencode(query)
-        )
+        r = requests.get("https://tiktok.com/@{}?lang=en".format(username), headers={
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+            "authority": "www.tiktok.com",
+            "path": "/{}".format(username),
+            "Accept-Encoding": "gzip, deflate",
+            "Connection": "keep-alive",
+            "Host": "www.tiktok.com",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36",
+            "Cookie": "s_v_web_id=" + kwargs.get("custom_verifyFp", "verify_khgp4f49_V12d4mRX_MdCO_4Wzt_Ar0k_z4RCQC9pUDpX"),
+        }, proxies=self.__format_proxy(kwargs.get("proxy", None)))
 
-        return self.getData(url=api_url, **kwargs)
+        t = r.text
+
+        j_raw = t.split('<script id="__NEXT_DATA__" type="application/json" crossorigin="anonymous">')[1].split("</script>")[0]
+         
+        return json.loads(j_raw)['props']['pageProps']
 
     def getSuggestedUsersbyID(
         self, userId="6745191554350760966", count=30, **kwargs
@@ -1365,14 +1390,24 @@ class TikTokApi:
                 return r.content
 
     def get_music_title(self, id, **kwargs):
-        r = requests.get("https://www.tiktok.com/music/-{}".format(id), proxies=self.__format_proxy(kwargs.get("proxy", None)))
-        text = r.text.split('TikTok","desc":')[0]
-        on_tiktok = text.split(" | ")
-        return on_tiktok[len(on_tiktok)-2].split(" ")[1]
+        r = requests.get("https://www.tiktok.com/music/-{}".format(id), headers={
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+            "authority": "www.tiktok.com",
+            "Accept-Encoding": "gzip, deflate",
+            "Connection": "keep-alive",
+            "Host": "www.tiktok.com",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36",
+            "Cookie": "s_v_web_id=" + kwargs.get("custom_verifyFp", "verify_khgp4f49_V12d4mRX_MdCO_4Wzt_Ar0k_z4RCQC9pUDpX"),
+        }, proxies=self.__format_proxy(kwargs.get("proxy", None)))
+        t = r.text
+        j_raw = t.split('<script id="__NEXT_DATA__" type="application/json" crossorigin="anonymous">')[1].split("</script>")[0]
+        return json.loads(j_raw)['props']['pageProps']['musicInfo']['title']
 
     def get_secUid(self, username, **kwargs):
         r = requests.get("https://tiktok.com/@{}?lang=en".format(username), headers={
-            "Accept": "*/*",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+            "authority": "www.tiktok.com",
+            "path": "/{}".format(username),
             "Accept-Encoding": "gzip, deflate",
             "Connection": "keep-alive",
             "Host": "www.tiktok.com",
